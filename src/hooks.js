@@ -47,8 +47,9 @@ export function usePlayback(duration) {
   }, [stop]);
 
   const play = useCallback(() => {
+    setCurrentTime(prev => (prev >= duration ? 0 : prev));
     setPlaying(true);
-  }, []);
+  }, [duration]);
 
   const seek = useCallback((t) => {
     setCurrentTime(Math.max(0, Math.min(t, duration)));
@@ -61,11 +62,12 @@ export function usePlayback(duration) {
       if (lastTimeRef.current === null) {
         lastTimeRef.current = timestamp;
       }
-      const delta = timestamp - lastTimeRef.current;
+      // timestamp is in ms, convert delta to seconds
+      const deltaSec = (timestamp - lastTimeRef.current) / 1000;
       lastTimeRef.current = timestamp;
 
       setCurrentTime(prev => {
-        const next = prev + delta * speed;
+        const next = prev + deltaSec * speed;
         if (next >= duration) {
           setPlaying(false);
           return duration;

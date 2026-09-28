@@ -164,8 +164,8 @@ function PlayerPanel({ userId, player, onClose, currentTime }) {
   );
 }
 
-function formatMs(ms) {
-  const s = Math.floor(ms / 1000);
+function formatMs(sec) {
+  const s = Math.floor(sec || 0);
   const m = Math.floor(s / 60);
   return `${m}:${(s % 60).toString().padStart(2, '0')}`;
 }

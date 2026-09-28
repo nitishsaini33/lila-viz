@@ -205,7 +205,27 @@ export default function MapCanvas({
         // Draw path up to currentTime
         if (showPaths && player.pos && player.pos.length > 0) {
           const visiblePos = player.pos.filter(p => p[2] <= currentTime);
-          if (visiblePos.length > 1) {
+
+          // Calculate smoothly interpolated current position
+          let currentPt = null;
+          if (currentTime >= player.pos[0][2]) {
+            const nextIdx = player.pos.findIndex(p => p[2] > currentTime);
+            if (nextIdx === -1) {
+              const last = player.pos[player.pos.length - 1];
+              currentPt = [last[0], last[1]];
+            } else if (nextIdx > 0) {
+              const p0 = player.pos[nextIdx - 1];
+              const p1 = player.pos[nextIdx];
+              const span = p1[2] - p0[2];
+              const frac = span > 0 ? (currentTime - p0[2]) / span : 0;
+              currentPt = [
+                p0[0] + (p1[0] - p0[0]) * frac,
+                p0[1] + (p1[1] - p0[1]) * frac,
+              ];
+            }
+          }
+
+          if (visiblePos.length > 0 || currentPt) {
             ctx.save();
             ctx.strokeStyle = isSelected ? (isHuman ? '#93c5fd' : '#fcd34d') : color;
             ctx.lineWidth = isSelected ? 2.5 : isHovered ? 2 : 1.5;
@@ -217,25 +237,27 @@ export default function MapCanvas({
             if (!isHuman) ctx.setLineDash([4, 4]);
 
             ctx.beginPath();
-            ctx.moveTo(visiblePos[0][0], visiblePos[0][1]);
+            const startPt = visiblePos[0] || currentPt;
+            ctx.moveTo(startPt[0], startPt[1]);
             for (let i = 1; i < visiblePos.length; i++) {
               ctx.lineTo(visiblePos[i][0], visiblePos[i][1]);
+            }
+            if (currentPt && visiblePos.length > 0) {
+              ctx.lineTo(currentPt[0], currentPt[1]);
             }
             ctx.stroke();
             ctx.restore();
           }
 
           // Current position marker
-          const currentPos = player.pos.filter(p => p[2] <= currentTime);
-          if (currentPos.length > 0) {
-            const last = currentPos[currentPos.length - 1];
+          if (currentPt) {
             ctx.save();
             ctx.fillStyle = isSelected ? (isHuman ? '#93c5fd' : '#fcd34d') : color;
             ctx.strokeStyle = 'rgba(0,0,0,0.8)';
             ctx.lineWidth = 1.5;
             ctx.globalAlpha = isHovered || isSelected ? 1 : 0.8;
             ctx.beginPath();
-            ctx.arc(last[0], last[1], isSelected ? 5 : 4, 0, Math.PI * 2);
+            ctx.arc(currentPt[0], currentPt[1], isSelected ? 5 : 4, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
             ctx.restore();
@@ -256,16 +278,33 @@ export default function MapCanvas({
         const player = matchData.players[selectedPlayer];
         const isHuman = !player.bot;
         const color = isHuman ? '#93c5fd' : '#fcd34d';
-        const pos = (player.pos || []).filter(p => p[2] <= currentTime);
-        if (pos.length > 0) {
-          const last = pos[pos.length - 1];
+
+        let selPt = null;
+        if (player.pos && player.pos.length > 0 && currentTime >= player.pos[0][2]) {
+          const nextIdx = player.pos.findIndex(p => p[2] > currentTime);
+          if (nextIdx === -1) {
+            const last = player.pos[player.pos.length - 1];
+            selPt = [last[0], last[1]];
+          } else if (nextIdx > 0) {
+            const p0 = player.pos[nextIdx - 1];
+            const p1 = player.pos[nextIdx];
+            const span = p1[2] - p0[2];
+            const frac = span > 0 ? (currentTime - p0[2]) / span : 0;
+            selPt = [
+              p0[0] + (p1[0] - p0[0]) * frac,
+              p0[1] + (p1[1] - p0[1]) * frac,
+            ];
+          }
+        }
+
+        if (selPt) {
           // Pulsing ring
           ctx.save();
           ctx.strokeStyle = color;
           ctx.lineWidth = 2;
           ctx.globalAlpha = 0.5;
           ctx.beginPath();
-          ctx.arc(last[0], last[1], 10, 0, Math.PI * 2);
+          ctx.arc(selPt[0], selPt[1], 10, 0, Math.PI * 2);
           ctx.stroke();
           ctx.restore();
         }
@@ -328,11 +367,26 @@ export default function MapCanvas({
       let found = null;
       for (const [userId, player] of Object.entries(matchData.players || {})) {
         if (player.bot && !showBots) continue;
-        const pos = (player.pos || []).filter(p => p[2] <= currentTime);
-        if (pos.length > 0) {
-          const last = pos[pos.length - 1];
-          const dx = last[0] - mx, dy = last[1] - my;
-          if (Math.sqrt(dx * dx + dy * dy) < 8 / scale) {
+        let curPt = null;
+        if (player.pos && player.pos.length > 0 && currentTime >= player.pos[0][2]) {
+          const nextIdx = player.pos.findIndex(p => p[2] > currentTime);
+          if (nextIdx === -1) {
+            const last = player.pos[player.pos.length - 1];
+            curPt = [last[0], last[1]];
+          } else if (nextIdx > 0) {
+            const p0 = player.pos[nextIdx - 1];
+            const p1 = player.pos[nextIdx];
+            const span = p1[2] - p0[2];
+            const frac = span > 0 ? (currentTime - p0[2]) / span : 0;
+            curPt = [
+              p0[0] + (p1[0] - p0[0]) * frac,
+              p0[1] + (p1[1] - p0[1]) * frac,
+            ];
+          }
+        }
+        if (curPt) {
+          const dx = curPt[0] - mx, dy = curPt[1] - my;
+          if (Math.sqrt(dx * dx + dy * dy) < 12 / scale) {
             found = userId;
             break;
           }

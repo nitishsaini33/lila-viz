@@ -28,8 +28,8 @@ export default function Timeline({
     onSeek(frac * duration);
   }, [duration, onSeek]);
 
-  const formatTime = (ms) => {
-    const s = Math.floor(ms / 1000);
+  const formatTime = (totalSeconds) => {
+    const s = Math.floor(totalSeconds || 0);
     const m = Math.floor(s / 60);
     const sec = s % 60;
     return `${m}:${sec.toString().padStart(2, '0')}`;
@@ -51,7 +51,7 @@ export default function Timeline({
 
   const markerColors = { Kill: '#f97316', Killed: '#ef4444', KilledByStorm: '#a855f7' };
 
-  const speeds = [0.5, 1, 2, 4, 8];
+  const speeds = [0.25, 0.5, 1, 2, 4];
 
   return (
     <div className={styles.timeline}>
