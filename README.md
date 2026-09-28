@@ -2,7 +2,7 @@
 
 A web-based tool for Level Designers to explore player behavior across LILA BLACK's maps — built with React + Vite, rendered on HTML Canvas.
 
-🔗 **Live URL:** _Add after deploying to Vercel_
+🔗 **Live URL:** https://lila-viz-two.vercel.app/
 
 ---
 
