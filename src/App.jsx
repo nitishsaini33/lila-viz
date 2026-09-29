@@ -15,6 +15,9 @@ export default function App() {
   const [showEvents, setShowEvents] = useState(true);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
+  // Mobile sidebar state
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   // Load match index
   const { data: matches, loading: matchesLoading } = useDataFetch('/data/matches.json');
 
@@ -35,10 +38,11 @@ export default function App() {
   const duration = matchData?.duration || 0;
   const { currentTime, playing, speed, play, stop, reset, seek, setSpeed } = usePlayback(duration);
 
-  // When match changes, reset player selection
+  // When match changes, reset player selection and close mobile sidebar
   const handleSelectMatch = useCallback((matchId) => {
     setSelectedMatch(matchId);
     setSelectedPlayer(null);
+    setSidebarOpen(false);   // auto-close drawer after selecting a match on mobile
   }, []);
 
   // Determine map to show (from selected match, or from filter)
@@ -50,7 +54,24 @@ export default function App() {
 
   return (
     <div className={styles.app}>
-      {/* Sidebar */}
+      {/* ── Mobile menu toggle button ── */}
+      <button
+        className={styles.menuBtn}
+        onClick={() => setSidebarOpen(true)}
+        aria-label="Open sidebar"
+        title="Open sidebar"
+      >
+        ☰
+      </button>
+
+      {/* ── Backdrop for mobile sidebar ── */}
+      <div
+        className={`${styles.sidebarBackdrop} ${sidebarOpen ? styles.sidebarBackdropOpen : ''}`}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* ── Sidebar ── */}
       <Sidebar
         matches={matches}
         filters={filters}
@@ -66,9 +87,11 @@ export default function App() {
         showEvents={showEvents}
         onShowEventsChange={setShowEvents}
         matchData={matchData}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
-      {/* Main content */}
+      {/* ── Main content ── */}
       <div className={styles.main}>
         {/* Loading bar */}
         {(matchesLoading || matchLoading) && (
@@ -106,7 +129,7 @@ export default function App() {
         />
       </div>
 
-      {/* Selected player info panel */}
+      {/* ── Selected player info panel ── */}
       {selectedPlayer && matchData && matchData.players[selectedPlayer] && (
         <PlayerPanel
           userId={selectedPlayer}
@@ -125,9 +148,9 @@ function PlayerPanel({ userId, player, onClose, currentTime }) {
   const visibleEvents = events.filter(e => e.t <= currentTime);
   const positions = (player.pos || []).filter(p => p[2] <= currentTime);
 
-  const killCount = visibleEvents.filter(e => e.e === 'Kill' || e.e === 'BotKill').length;
+  const killCount  = visibleEvents.filter(e => e.e === 'Kill'  || e.e === 'BotKill').length;
   const deathCount = visibleEvents.filter(e => e.e === 'Killed' || e.e === 'BotKilled' || e.e === 'KilledByStorm').length;
-  const lootCount = visibleEvents.filter(e => e.e === 'Loot').length;
+  const lootCount  = visibleEvents.filter(e => e.e === 'Loot').length;
 
   const eventColors = {
     Kill: '#f97316', BotKill: '#fb923c',
@@ -144,7 +167,7 @@ function PlayerPanel({ userId, player, onClose, currentTime }) {
           </div>
           <div className={styles.playerId}>{userId}</div>
         </div>
-        <button className={styles.closeBtn} onClick={onClose}>✕</button>
+        <button className={styles.closeBtn} onClick={onClose} aria-label="Close player panel">✕</button>
       </div>
       <div className={styles.playerStats}>
         <div className={styles.pStat}><span style={{ color: '#f97316' }}>⚔️</span> {killCount} kills</div>

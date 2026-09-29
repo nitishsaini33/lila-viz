@@ -1,3 +1,7 @@
+/* ============================================================
+   Sidebar — Fully Responsive
+   ============================================================ */
+
 .sidebar {
   width: var(--sidebar-width);
   flex-shrink: 0;
@@ -7,8 +11,13 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  transition: transform var(--transition-medium);
+  z-index: 40;
 }
 
+/* ────────────────────────────────
+   Header
+   ──────────────────────────────── */
 .header {
   padding: 16px;
   border-bottom: 1px solid var(--border-subtle);
@@ -40,12 +49,42 @@
   letter-spacing: 0.05em;
 }
 
+/* Close button shown only on mobile */
+.closeBtn {
+  display: none;
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+}
+
+/* ────────────────────────────────
+   Scrollable body
+   ──────────────────────────────── */
 .scrollable {
   flex: 1;
   overflow-y: auto;
   padding-bottom: 16px;
+  overscroll-behavior: contain;
 }
 
+/* ────────────────────────────────
+   Section
+   ──────────────────────────────── */
 .section {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-subtle);
@@ -60,6 +99,9 @@
   margin-bottom: 10px;
 }
 
+/* ────────────────────────────────
+   Filters
+   ──────────────────────────────── */
 .filterGroup {
   margin-bottom: 8px;
 }
@@ -81,6 +123,9 @@
   margin-top: 6px;
 }
 
+/* ────────────────────────────────
+   Match list
+   ──────────────────────────────── */
 .matchList {
   max-height: 280px;
   overflow-y: auto;
@@ -149,6 +194,9 @@
   padding: 6px;
 }
 
+/* ────────────────────────────────
+   Match stats grid
+   ──────────────────────────────── */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -188,6 +236,9 @@
   text-align: center;
 }
 
+/* ────────────────────────────────
+   Display toggles
+   ──────────────────────────────── */
 .toggleRow {
   display: flex;
   justify-content: space-between;
@@ -207,6 +258,7 @@
   transition: all var(--transition-fast);
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .toggle.on {
@@ -230,6 +282,9 @@
   background: white;
 }
 
+/* ────────────────────────────────
+   Heatmap controls
+   ──────────────────────────────── */
 .heatmapList {
   display: flex;
   flex-direction: column;
@@ -268,6 +323,9 @@
   flex-shrink: 0;
 }
 
+/* ────────────────────────────────
+   Legend
+   ──────────────────────────────── */
 .legend {
   display: flex;
   flex-direction: column;
@@ -286,6 +344,7 @@
   width: 18px;
   height: 2px;
   border-radius: 1px;
+  flex-shrink: 0;
 }
 
 .legendDot {
@@ -293,4 +352,82 @@
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================ */
+
+/* ── Tablet (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .matchList {
+    max-height: 220px;
+  }
+}
+
+/* ── Mobile (≤ 768px) ── */
+@media (max-width: 768px) {
+  .sidebar {
+    /* Slide in from left as a drawer */
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(320px, 85vw);
+    transform: translateX(-110%);
+    border-right: 1px solid var(--border-medium);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .closeBtn {
+    display: flex;
+  }
+
+  .header {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .logo {
+    /* Give space so the close button sits in the header row */
+    flex: 1;
+  }
+
+  .matchList {
+    max-height: 240px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .statVal {
+    font-size: 16px;
+  }
+
+  /* Heatmap buttons in a 2-col grid on mobile */
+  .heatmapList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── Small mobile (≤ 480px) ── */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 92vw;
+  }
+
+  .sectionTitle {
+    font-size: 9px;
+  }
+
+  .statVal {
+    font-size: 15px;
+  }
 }

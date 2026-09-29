@@ -17,20 +17,25 @@ export default function Timeline({
 
   const handleBarClick = useCallback((e) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    // Support both mouse (clientX) and touch (changedTouches[0].clientX)
+    const clientX = e.clientX ?? e.changedTouches?.[0]?.clientX ?? 0;
+    const frac = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     onSeek(frac * duration);
   }, [duration, onSeek]);
 
   const handleBarDrag = useCallback((e) => {
-    if (e.buttons !== 1) return;
+    // For mouse: only drag when button held; for pointer: check buttons
+    if (e.type === 'mousemove' && e.buttons !== 1) return;
+    if (e.type === 'pointermove' && e.buttons !== 1) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const clientX = e.clientX ?? 0;
+    const frac = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     onSeek(frac * duration);
   }, [duration, onSeek]);
 
   const formatTime = (totalSeconds) => {
-    const s = Math.floor(totalSeconds || 0);
-    const m = Math.floor(s / 60);
+    const s   = Math.floor(totalSeconds || 0);
+    const m   = Math.floor(s / 60);
     const sec = s % 60;
     return `${m}:${sec.toString().padStart(2, '0')}`;
   };
@@ -95,10 +100,13 @@ export default function Timeline({
           ))}
         </div>
 
+        {/* Scrubber — Pointer Events API handles mouse + touch uniformly */}
         <div
           className={styles.scrubber}
           onClick={handleBarClick}
           onMouseMove={handleBarDrag}
+          onPointerDown={handleBarClick}
+          onPointerMove={handleBarDrag}
           role="slider"
           aria-valuemin={0}
           aria-valuemax={duration}
@@ -114,13 +122,17 @@ export default function Timeline({
         </div>
       </div>
 
-      {/* Speed controls */}
+      {/* Speed controls — slow speeds hidden on very small screens via hideMobile */}
       <div className={styles.speedControls}>
         <span className={styles.speedLabel}>Speed</span>
         {speeds.map(s => (
           <button
             key={s}
-            className={`${styles.speedBtn} ${speed === s ? styles.activeSpeed : ''}`}
+            className={[
+              styles.speedBtn,
+              speed === s ? styles.activeSpeed : '',
+              s < 1 ? styles.hideMobile : '',
+            ].join(' ')}
             onClick={() => onSpeedChange(s)}
           >
             {s}x

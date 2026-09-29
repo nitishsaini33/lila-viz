@@ -1,14 +1,22 @@
+/* ============================================================
+   Timeline — Fully Responsive
+   ============================================================ */
+
 .timeline {
   height: var(--timeline-height);
   background: var(--bg-surface);
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 20px;
+  gap: 12px;
+  padding: 0 16px;
   flex-shrink: 0;
+  min-width: 0;
 }
 
+/* ────────────────────────────────
+   Playback controls
+   ──────────────────────────────── */
 .controls {
   display: flex;
   align-items: center;
@@ -29,6 +37,7 @@
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .resetBtn:hover {
@@ -50,6 +59,7 @@
   justify-content: center;
   transition: all var(--transition-fast);
   box-shadow: 0 0 16px var(--accent-primary-glow);
+  flex-shrink: 0;
 }
 
 .playBtn:hover {
@@ -68,12 +78,17 @@
   border: 2px solid var(--accent-primary);
 }
 
+/* ────────────────────────────────
+   Time display
+   ──────────────────────────────── */
 .timeDisplay {
   display: flex;
   align-items: center;
   gap: 4px;
   font-family: var(--font-mono);
   font-size: 13px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .currentTime {
@@ -89,12 +104,16 @@
   color: var(--text-secondary);
 }
 
+/* ────────────────────────────────
+   Scrubber
+   ──────────────────────────────── */
 .scrubberWrap {
   flex: 1;
   position: relative;
   height: 28px;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .markerLayer {
@@ -121,6 +140,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  touch-action: none;       /* allow pointer events on touch */
 }
 
 .track {
@@ -163,6 +183,9 @@
   transform: translate(-50%, -50%) scale(1.3);
 }
 
+/* ────────────────────────────────
+   Speed controls
+   ──────────────────────────────── */
 .speedControls {
   display: flex;
   align-items: center;
@@ -174,6 +197,7 @@
   font-size: 11px;
   color: var(--text-muted);
   margin-right: 2px;
+  white-space: nowrap;
 }
 
 .speedBtn {
@@ -186,6 +210,7 @@
   cursor: pointer;
   font-family: var(--font-mono);
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
 .speedBtn:hover {
@@ -197,4 +222,76 @@
   background: rgba(99,102,241,0.2);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================ */
+
+/* ── Tablet (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .timeline {
+    gap: 10px;
+    padding: 0 12px;
+  }
+
+  .speedBtn {
+    padding: 2px 6px;
+  }
+}
+
+/* ── Mobile (≤ 768px) ── */
+@media (max-width: 768px) {
+  .timeline {
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  /* Hide the reset button to save space; play button stays */
+  .resetBtn {
+    display: none;
+  }
+
+  .playBtn {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .timeDisplay {
+    font-size: 12px;
+  }
+
+  /* Hide "Speed" label, keep just buttons */
+  .speedLabel {
+    display: none;
+  }
+
+  .speedBtn {
+    padding: 2px 5px;
+    font-size: 10px;
+  }
+}
+
+/* ── Small mobile (≤ 480px) ── */
+@media (max-width: 480px) {
+  .timeline {
+    gap: 6px;
+    padding: 0 8px;
+  }
+
+  .playBtn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .timeDisplay {
+    font-size: 11px;
+  }
+
+  /* Show only 1× 2× 4× on very small screens */
+  .speedBtn.hideMobile {
+    display: none;
+  }
 }

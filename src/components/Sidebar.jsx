@@ -17,6 +17,8 @@ export default function Sidebar({
   showEvents,
   onShowEventsChange,
   matchData,
+  isOpen,      // boolean — mobile drawer open state
+  onClose,     // fn    — closes the drawer on mobile
 }) {
   const maps = ['All', 'AmbroseValley', 'GrandRift', 'Lockdown'];
   const days = ['All', 'February_10', 'February_11', 'February_12', 'February_13', 'February_14'];
@@ -36,22 +38,22 @@ export default function Sidebar({
     if (!matchData) return null;
     const players = Object.values(matchData.players || {});
     const humans = players.filter(p => !p.bot);
-    const bots = players.filter(p => p.bot);
+    const bots   = players.filter(p =>  p.bot);
     const allEvents = players.flatMap(p => p.events || []);
     return {
       humans: humans.length,
-      bots: bots.length,
-      kills: allEvents.filter(e => e.e === 'Kill' || e.e === 'BotKill').length,
+      bots:   bots.length,
+      kills:  allEvents.filter(e => e.e === 'Kill' || e.e === 'BotKill').length,
       deaths: allEvents.filter(e => e.e === 'Killed' || e.e === 'BotKilled').length,
-      storm: allEvents.filter(e => e.e === 'KilledByStorm').length,
-      loot: allEvents.filter(e => e.e === 'Loot').length,
+      storm:  allEvents.filter(e => e.e === 'KilledByStorm').length,
+      loot:   allEvents.filter(e => e.e === 'Loot').length,
       duration: matchData.duration,
     };
   }, [matchData]);
 
   return (
-    <aside className={styles.sidebar}>
-      {/* Header */}
+    <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+      {/* ── Header ── */}
       <div className={styles.header}>
         <div className={styles.logo}>
           <span className={styles.logoIcon}>⬟</span>
@@ -60,10 +62,19 @@ export default function Sidebar({
             <div className={styles.logoSub}>Journey Visualizer</div>
           </div>
         </div>
+        {/* Close button — visible only on mobile via CSS */}
+        <button
+          className={styles.closeBtn}
+          onClick={onClose}
+          aria-label="Close sidebar"
+          title="Close sidebar"
+        >
+          ✕
+        </button>
       </div>
 
       <div className={styles.scrollable}>
-        {/* Filters */}
+        {/* ── Filters ── */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Filters</h2>
           <div className={styles.filterGroup}>
@@ -93,7 +104,7 @@ export default function Sidebar({
           </div>
         </section>
 
-        {/* Match List */}
+        {/* ── Match List ── */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Matches</h2>
           <div className={styles.matchList}>
@@ -117,7 +128,7 @@ export default function Sidebar({
           </div>
         </section>
 
-        {/* Match Stats */}
+        {/* ── Match Stats ── */}
         {stats && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Match Stats</h2>
@@ -159,7 +170,7 @@ export default function Sidebar({
           </section>
         )}
 
-        {/* Display Options */}
+        {/* ── Display Options ── */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Display</h2>
 
@@ -192,7 +203,7 @@ export default function Sidebar({
           </div>
         </section>
 
-        {/* Heatmap Layer */}
+        {/* ── Heatmap Layer ── */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Heatmap</h2>
           <div className={styles.heatmapList}>
@@ -216,7 +227,7 @@ export default function Sidebar({
           </div>
         </section>
 
-        {/* Legend */}
+        {/* ── Legend ── */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Legend</h2>
           <div className={styles.legend}>
@@ -243,8 +254,8 @@ export default function Sidebar({
 
 function formatDuration(ms) {
   if (!ms) return '—';
-  const s = Math.floor(ms / 1000);
-  const m = Math.floor(s / 60);
+  const s   = Math.floor(ms / 1000);
+  const m   = Math.floor(s / 60);
   const sec = s % 60;
   return `${m}m ${sec.toString().padStart(2, '0')}s`;
 }
